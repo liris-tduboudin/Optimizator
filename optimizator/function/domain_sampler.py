@@ -7,12 +7,11 @@ class DomainSampler(nn.Module):
 
         self.nb_points = nb_points
         self.dims = dims
-        weight_init = 2 * (torch.rand(self.nb_points, self.dims)-0.5)
-        for candidate_idx in range(self.nb_points):
-            for harmonic_idx in range(self.dims):
-                magnitude = 10**(-0.21*harmonic_idx - 1.6)
-                weight_init[candidate_idx, harmonic_idx] *= magnitude
-        
+        weight_init = torch.zeros(self.nb_points, self.dims)
+        for harmonic_idx in range(self.dims):
+            # magnitude = 10*10**(-0.21*harmonic_idx - 1.6)
+            magnitude = 1.0
+            weight_init[:, harmonic_idx] = magnitude*2.0*(torch.rand(self.nb_points)-0.5)
         self.weight = nn.Parameter(weight_init)
 
     def forward(self, _):

@@ -13,11 +13,21 @@ from logger.visualize import visualize
 
 if __name__ == '__main__':
 
-    device = torch.device("cuda:0")
+    device = torch.device(opt_config.device)
 
-    solutions_storage = []
+    if opt_config.checkpoint_path is not None:
+        checkpoint = torch.load(opt_config.checkpoint_path)
+        omega_start = checkpoint['omega_start']
+        omega_end = checkpoint['omega_end']
+        omega_steps = checkpoint['omega_steps']
+        solutions_storage = checkpoint['solutions_storage']
+    else:
+        omega_start = func_config.omegas_range[0]
+        omega_end = func_config.omegas_range[1]
+        omega_steps = func_config.omegas_steps
+        solutions_storage = []
 
-    for omega in np.linspace(func_config.omegas_range[0], func_config.omegas_range[1], func_config.omegas_steps):
+    for omega_idx, omega in enumerate(np.linspace(omega_start, omega_end, omega_steps)):
 
         Z, Fh = construction_Zred_Fred_dZreddw_dFreddw(omega,func_config.M,func_config.C,func_config.K,func_config.F,func_config.Nh,func_config.beta,func_config.gamma,func_config.ddl_ln,func_config.ddl_nl,func_config.derivatives,func_config.penalite,func_config.nu)
         Z = torch.tensor(Z, dtype=torch.float32, device=device)
@@ -33,11 +43,17 @@ if __name__ == '__main__':
                                 'exponential_mean':opt_config.exponential_mean,
                                 'scheduler_factor':opt_config.scheduler_factor,
                                 'scheduler_patience':opt_config.scheduler_patience,
-                                'scheduler_min_lr':opt_config.scheduler_min_lr}
+                                'scheduler_min_lr':opt_config.scheduler_min_lr,
+                                'finetuning_iterations':opt_config.finetuning_iterations}
 
         solutions, loss = optimize(target_function, target_function_hparams, DomainSampler, optimization_hparams, device)
         if solutions is not None:
             solutions_storage.append([omega, solutions])
+            checkpoint = {'omega_start':omega+(func_config.omegas_range[1]-func_config.omegas_range[0])/func_config.omegas_steps,
+                          'omega_end':func_config.omegas_range[1],
+                          'omega_steps':func_config.omegas_steps-omega_idx+1,
+                          'solutions_storage':solutions_storage}
+            torch.save(checkpoint, './checkpoint/checkpoint.pt')
             print("For omega =", omega, ",", solutions.size(0), "solutions were found.")
             print("With losses :", loss)
         else:

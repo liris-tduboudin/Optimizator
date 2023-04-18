@@ -33,7 +33,7 @@ seuil_xi = np.array([1])
 fact_xi = np.array([1])
 C = amort_modal(K,M,xi,seuil_xi,fact_xi)
 
-f0 = 2
+f0 = 20
 w,p = eigh(K,M)
 F = f0*M@p[:,0]
 
@@ -44,7 +44,7 @@ ddl_ln = np.array([0],dtype=np.int64)
 
 derivatives = False
 penalite = None
-nu = 1
+nu = 4
 
-omegas_range = [7.0, 10.0]
+omegas_range = [7.0, 11.5]
 omegas_steps = 100
