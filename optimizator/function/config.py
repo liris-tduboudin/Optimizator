@@ -8,7 +8,7 @@ import numpy as np
 from scipy.linalg import eigh
 from function.helper_functions import *
 
-Nt = 512
+Nt = 4096
 Nh = 20
 IDFT_1ddl = construction_IDFT(Nt,Nh,1)
 DFT_1ddl = construction_DFT(Nt,Nh,1)
@@ -46,5 +46,6 @@ derivatives = False
 penalite = None
 nu = 4
 
-omegas_range = [7.0, 11.5]
-omegas_steps = 100
+omegas_range = [7.0/nu, 12.0/nu]
+#omegas_range = [11.5/nu, 12.0/nu]
+omegas_steps = 100#3

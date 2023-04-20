@@ -11,6 +11,9 @@ import optimizer.config as opt_config
 
 from logger.visualize import visualize
 
+import time
+from datetime import timedelta
+
 if __name__ == '__main__':
 
     device = torch.device(opt_config.device)
@@ -26,8 +29,12 @@ if __name__ == '__main__':
         omega_end = func_config.omegas_range[1]
         omega_steps = func_config.omegas_steps
         solutions_storage = []
+    
+    global_start_time = time.time()
 
     for omega_idx, omega in enumerate(np.linspace(omega_start, omega_end, omega_steps)):
+
+        omega_start_time = time.time()
 
         Z, Fh = construction_Zred_Fred_dZreddw_dFreddw(omega,func_config.M,func_config.C,func_config.K,func_config.F,func_config.Nh,func_config.beta,func_config.gamma,func_config.ddl_ln,func_config.ddl_nl,func_config.derivatives,func_config.penalite,func_config.nu)
         Z = torch.tensor(Z, dtype=torch.float32, device=device)
@@ -51,7 +58,7 @@ if __name__ == '__main__':
             solutions_storage.append([omega, solutions])
             checkpoint = {'omega_start':omega+(func_config.omegas_range[1]-func_config.omegas_range[0])/func_config.omegas_steps,
                           'omega_end':func_config.omegas_range[1],
-                          'omega_steps':func_config.omegas_steps-omega_idx+1,
+                          'omega_steps':func_config.omegas_steps-omega_idx-1,
                           'solutions_storage':solutions_storage}
             torch.save(checkpoint, './checkpoint/checkpoint.pt')
             print("For omega =", omega, ",", solutions.size(0), "solutions were found.")
@@ -59,6 +66,11 @@ if __name__ == '__main__':
         else:
             print("For omega =", omega, ",", "no solutions were found.")
             print("Best loss reached :", loss)
+
+        omega_end_time = time.time()
+        omega_duration = omega_end_time-omega_start_time
+        print("Time elapsed :", str(timedelta(seconds=omega_duration)))
+        print("Expected remaining time :", str(timedelta(seconds=omega_duration*(omega_steps-omega_idx-1))))
 
     amps_lin = []
     for omega, solutions in solutions_storage:
