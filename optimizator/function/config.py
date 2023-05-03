@@ -3,17 +3,15 @@
 Jeux de paramètres globaux, invariants sur les expériences
 """
 
-import torch
 import numpy as np
+import jax.numpy as jnp
 from scipy.linalg import eigh
 from function.helper_functions import *
 
 Nt = 4096
 Nh = 20
-IDFT_1ddl = construction_IDFT(Nt,Nh,1)
-DFT_1ddl = construction_DFT(Nt,Nh,1)
-IDFT_1ddl_tensor = torch.tensor(IDFT_1ddl, dtype=torch.float32)
-DFT_1ddl_tensor = torch.tensor(DFT_1ddl, dtype=torch.float32)
+IDFT_1ddl = jnp.array(construction_IDFT(Nt,Nh,1))
+DFT_1ddl = jnp.array(construction_DFT(Nt,Nh,1))
 
 kn = 1e4 #1e3
 eps = 1e1 #5e1

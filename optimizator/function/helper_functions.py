@@ -1,5 +1,6 @@
-import torch
 import numpy as np
+import jax
+import jax.numpy as jnp
 from scipy.linalg import eigh
 
 def amort_modal(K,M,xi,seuil_xi=np.array([]),fact_xi=np.array([])):
@@ -264,10 +265,11 @@ def construction_Zred_Fred_dZreddw_dFreddw(omega,M,C,K,F,Nh,beta,gamma,ddl_ln,dd
 					dFr_k_dw = dZr_k_dw@Z_red_k_inv@F_k_red + Zr_k@(Z_red_k_inv@dF_k_reddw - Z_red_k_inv@dZ_k_reddw@Z_red_k_inv@F_k_red)
 					dFr_dw[k*2*n_dof_nl-n_dof_nl:(k+1)*2*n_dof_nl-n_dof_nl]  = dFr_k_dw
 
-	return Z_red,F_red
+	return jnp.array(Z_red),jnp.array(F_red)
 
-def fnl_tilde_rlhbm(Xh_red,IDFT_1ddl,DFT_1ddl,g0,kn,eps, Nt, device):
-	g = torch.mm(IDFT_1ddl.to(device),Xh_red.t())  - g0*torch.ones([Nt, Xh_red.size(0)], device=device)
-	fnl = kn/2*g + torch.sqrt((kn*g/2)**2 + eps**2)
-	fnl_tilde = torch.mm(DFT_1ddl.to(device),fnl).t()
+# @jax.jit
+def fnl_tilde_rlhbm(Xh_red,IDFT_1ddl,DFT_1ddl,g0,kn,eps, Nt):
+	g = IDFT_1ddl@Xh_red  - g0
+	fnl = kn/2*g + jnp.sqrt((kn*g/2)**2 + eps**2)
+	fnl_tilde = DFT_1ddl@fnl
 	return fnl_tilde
