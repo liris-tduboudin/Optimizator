@@ -5,7 +5,7 @@ import jax
 def optimize(target_function, 
              target_function_hparams,
              domain_sampler,
-             optimization_hparams,
+             optimization_hparams
              ):
 
     def loss_function(x):
@@ -14,7 +14,9 @@ def optimize(target_function,
         return loss
 
     # definitions
-    inputs = domain_sampler(optimization_hparams['nb_points'], target_function_hparams['nb_dims'])
+    inputs = domain_sampler(optimization_hparams['nb_points'], target_function_hparams['nb_dims'], optimization_hparams['key'])
+
+    print(inputs[0,0])
 
     loss_function_gradient, loss_function_hessian = derivatives(loss_function)
     vectorized_loss_function_gradient = jax.jit(jax.vmap(loss_function_gradient))

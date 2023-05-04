@@ -42,7 +42,8 @@ if __name__ == '__main__':
         optimization_hparams = {'nb_points':opt_config.nb_points,
                                 'iterations':opt_config.iterations,
                                 'kept_threshold':opt_config.kept_threshold,
-                                'merge_threshold':opt_config.merge_threshold}
+                                'merge_threshold':opt_config.merge_threshold,
+                                'key':omega_idx}
 
         solutions, loss = optimize(target_function, target_function_hparams, domain_sampler, optimization_hparams)
         if solutions is not None:

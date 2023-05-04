@@ -3,7 +3,7 @@ import jax
 from function.helper_functions import fnl_tilde_rlhbm
 from function.config import *
 
-# @jax.jit
+
 def target_function_maker(hparams_dict):
     def target_function(Xh):
         fnl_tilde = fnl_tilde_rlhbm(Xh,IDFT_1ddl,DFT_1ddl,g0,kn,eps, Nt)

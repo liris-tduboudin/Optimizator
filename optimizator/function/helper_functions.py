@@ -267,7 +267,6 @@ def construction_Zred_Fred_dZreddw_dFreddw(omega,M,C,K,F,Nh,beta,gamma,ddl_ln,dd
 
 	return jnp.array(Z_red),jnp.array(F_red)
 
-# @jax.jit
 def fnl_tilde_rlhbm(Xh_red,IDFT_1ddl,DFT_1ddl,g0,kn,eps, Nt):
 	g = IDFT_1ddl@Xh_red  - g0
 	fnl = kn/2*g + jnp.sqrt((kn*g/2)**2 + eps**2)

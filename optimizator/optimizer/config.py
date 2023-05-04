@@ -1,5 +1,4 @@
 
-device = "cuda:0"
 nb_points = 100
 iterations = 750
 kept_threshold = 1e-5
