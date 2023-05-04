@@ -12,5 +12,12 @@ def exact_newton_step(x, hessian, gradient):
     return x - jnp.linalg.solve(hessian, gradient)
 
 @jax.jit
-def jax_pairwise_distance(x, y):
-    return jnp.matmul(jnp.expand_dims(jnp.sum(x**2, axis=1), axis=1), jnp.expand_dims(jnp.sum(y**2, axis=1), axis=0)) - 2 * jnp.matmul(x, y.transpose())
+def jax_pairwise_distance(x,y):
+    x2 = jnp.repeat(jnp.expand_dims(jnp.sum(x**2, axis=1), axis=1), y.shape[0], axis=1)
+    y2 = jnp.repeat(jnp.expand_dims(jnp.sum(y**2, axis=1), axis=1), x.shape[0], axis=1).transpose()
+    xy = - 2 * jnp.matmul(x, y.transpose())
+    return x2+y2+xy
+
+@jax.jit
+def small_perturbation(inputs, key, gamma):
+    return inputs + gamma * jax.random.normal(key, inputs.shape)

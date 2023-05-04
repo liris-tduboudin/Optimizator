@@ -6,8 +6,12 @@ def target_function(x):
 
 vectorized_target_function = jax.vmap(target_function)
 
-def jax_pairwise_distance(x, y):
-    return jnp.matmul(jnp.expand_dims(jnp.sum(x**2, axis=1), axis=1), jnp.expand_dims(jnp.sum(y**2, axis=1), axis=0)) - 2 * jnp.matmul(x, y.transpose())
+# @jax.jit
+def jax_pairwise_distance(x,y):
+    x2 = jnp.repeat(jnp.expand_dims(jnp.sum(x**2, axis=1), axis=1), y.shape[0], axis=1)
+    y2 = jnp.repeat(jnp.expand_dims(jnp.sum(y**2, axis=1), axis=1), x.shape[0], axis=1).transpose()
+    xy = - 2 * jnp.matmul(x, y.transpose())
+    return x2+y2+xy
 
 if __name__ == '__main__':
 
@@ -22,9 +26,9 @@ if __name__ == '__main__':
     # yy = vectorized_target_function(xx)
     # print(yy, yy.shape)
 
-    x = jax.random.uniform(key, (7, 1000))
-    y = jax.random.uniform(new_key, (5, 1000))
+    x = jax.random.uniform(key, (3,5))
+    y = jax.random.uniform(new_key, (5,5))
 
-    xx = jax_pairwise_distance(x, y)
+    xx = jax_pairwise_distance(y, x)
     print(xx)
     print(xx.shape)

@@ -1,6 +1,6 @@
-import jax.numpy as jnp
-from optimizer.helper_functions import derivatives, exact_newton_step, jax_pairwise_distance
 import jax
+import jax.numpy as jnp
+from optimizer.helper_functions import derivatives, exact_newton_step, jax_pairwise_distance, small_perturbation
 
 def optimize(target_function, 
              target_function_hparams,
@@ -16,24 +16,30 @@ def optimize(target_function,
     # definitions
     inputs = domain_sampler(optimization_hparams['nb_points'], target_function_hparams['nb_dims'], optimization_hparams['key'])
 
-    print(inputs[0,0])
+    vectorized_target_function = jax.jit(jax.vmap(target_function))
 
     loss_function_gradient, loss_function_hessian = derivatives(loss_function)
     vectorized_loss_function_gradient = jax.jit(jax.vmap(loss_function_gradient))
     vectorized_loss_function_hessian = jax.jit(jax.vmap(loss_function_hessian))
+
     vectorized_exact_newton_step = jax.jit(jax.vmap(exact_newton_step))
-    vectorized_target_function = jax.jit(jax.vmap(target_function))
+
+    # gamma = 1e-7
+    # key, new_key = jax.random.split(jax.random.PRNGKey(optimization_hparams['key']))
 
     # optimization loop
     for iteration in range(optimization_hparams['iterations']):
 
-        hessians = vectorized_loss_function_hessian(inputs) # we need to vmap it before !! i believe it is the issue
+        hessians = vectorized_loss_function_hessian(inputs)
         gradients = vectorized_loss_function_gradient(inputs)
         inputs = vectorized_exact_newton_step(inputs, hessians, gradients)
+        # inputs = small_perturbation(inputs, key, gamma)
 
-        if iteration % 100 == 0:
-            loss = (vectorized_target_function(inputs)**2).sum(axis=1).mean()
-            print(loss)
+        # key, new_key = jax.random.split(new_key)
+
+        # if iteration % 100 == 0:
+        #     loss = (vectorized_target_function(inputs)**2).sum(axis=1).mean()
+        #     print(loss)
 
     # removal of improper solutions (e.g. bad local minima or saddle points)
     non_reduced_loss = (vectorized_target_function(inputs)**2).sum(axis=1)
@@ -50,7 +56,7 @@ def optimize(target_function,
         distance_to_all_found_distinct_solutions = jax_pairwise_distance(distinct_solutions, jnp.expand_dims(valid_solutions[valid_solution_idx], axis=0))
         # if a new distinct solution is found : add it to the list
         if (distance_to_all_found_distinct_solutions > optimization_hparams['merge_threshold']).all():
-            distinct_solutions = jnp.concatenate(distinct_solutions, jnp.expand_dims(valid_solutions[valid_solution_idx], axis=0), axis=0)
+            distinct_solutions = jnp.concatenate((distinct_solutions, jnp.expand_dims(valid_solutions[valid_solution_idx], axis=0)), axis=0)
 
     return distinct_solutions, (vectorized_target_function(distinct_solutions)**2).sum(axis=1)
 

@@ -1,4 +1,5 @@
 import numpy as np
+import jax.numpy as jnp
 import pickle 
 
 import function.config as func_config
@@ -70,7 +71,7 @@ if __name__ == '__main__':
         solutions_amps_lin = []
         for solution_idx in range(solutions.shape[0]):
             solution = solutions[solution_idx]
-            x_t = func_config.IDFT_1ddl_tensor@solution
+            x_t = func_config.IDFT_1ddl@solution
             solutions_amps_lin.append(jnp.abs(x_t).max())
         amps_lin.append([omega, solutions_amps_lin])
 
