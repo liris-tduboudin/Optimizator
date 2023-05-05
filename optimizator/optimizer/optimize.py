@@ -1,6 +1,6 @@
 import jax
 import jax.numpy as jnp
-from optimizer.helper_functions import derivatives, exact_newton_step, jax_pairwise_distance, small_perturbation
+from optimizer.helper_functions import derivatives, exact_newton_step, jax_pairwise_distance, make_BFGS_step
 
 def optimize(target_function, 
              target_function_hparams,
@@ -17,29 +17,35 @@ def optimize(target_function,
     inputs = domain_sampler(optimization_hparams['nb_points'], target_function_hparams['nb_dims'], optimization_hparams['key'])
 
     vectorized_target_function = jax.jit(jax.vmap(target_function))
-
     loss_function_gradient, loss_function_hessian = derivatives(loss_function)
     vectorized_loss_function_gradient = jax.jit(jax.vmap(loss_function_gradient))
     vectorized_loss_function_hessian = jax.jit(jax.vmap(loss_function_hessian))
 
+    ### exact newton ###
     vectorized_exact_newton_step = jax.jit(jax.vmap(exact_newton_step))
 
-    # gamma = 1e-7
-    # key, new_key = jax.random.split(jax.random.PRNGKey(optimization_hparams['key']))
+    ### bfgs ###
+    # bfgs_step = make_BFGS_step(loss_function_gradient)
+    # vectorized_bfgs_step = jax.jit(jax.vmap(bfgs_step))
+    # approx_hessians = jnp.repeat(jnp.expand_dims(jnp.identity(target_function_hparams['nb_dims']), axis=0), optimization_hparams['nb_points'], axis=0)
+    # vectorized_inv = jax.jit(jax.vmap(jnp.linalg.inv))
+    # approx_inv_hessians = vectorized_inv(vectorized_loss_function_hessian(inputs))
 
     # optimization loop
     for iteration in range(optimization_hparams['iterations']):
 
+        ### exact newton ###
         hessians = vectorized_loss_function_hessian(inputs)
         gradients = vectorized_loss_function_gradient(inputs)
         inputs = vectorized_exact_newton_step(inputs, hessians, gradients)
-        # inputs = small_perturbation(inputs, key, gamma)
 
-        # key, new_key = jax.random.split(new_key)
+        ### bfgs ###
+        # inputs, approx_inv_hessians = vectorized_bfgs_step(inputs, approx_inv_hessians)
 
-        # if iteration % 100 == 0:
-        #     loss = (vectorized_target_function(inputs)**2).sum(axis=1).mean()
-        #     print(loss)
+        if iteration % 1000 == 0:
+            losses = (vectorized_target_function(inputs)**2).sum(axis=1)
+            # print(losses)
+            print(losses.mean())
 
     # removal of improper solutions (e.g. bad local minima or saddle points)
     non_reduced_loss = (vectorized_target_function(inputs)**2).sum(axis=1)

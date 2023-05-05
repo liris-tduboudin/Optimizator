@@ -1,3 +1,6 @@
+# import jax
+# jax.config.update("jax_enable_x64", True)
+
 import numpy as np
 import jax.numpy as jnp
 import pickle 
@@ -16,6 +19,8 @@ import time
 from datetime import timedelta
 
 if __name__ == '__main__':
+
+    JAX_ENABLE_X64=True
 
     if opt_config.checkpoint_path is not None:
         checkpoint = pickle.load(opt_config.checkpoint_path)

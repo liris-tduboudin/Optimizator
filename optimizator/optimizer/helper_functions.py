@@ -9,7 +9,7 @@ def derivatives(target_function):
     return target_function_gradient, target_function_hessian
 
 def exact_newton_step(x, hessian, gradient):
-    return x - jnp.linalg.solve(hessian, gradient)
+    return x - 1e-2 * jnp.linalg.solve(hessian, gradient)
 
 @jax.jit
 def jax_pairwise_distance(x,y):
@@ -18,6 +18,15 @@ def jax_pairwise_distance(x,y):
     xy = - 2 * jnp.matmul(x, y.transpose())
     return x2+y2+xy
 
-@jax.jit
-def small_perturbation(inputs, key, gamma):
-    return inputs + gamma * jax.random.normal(key, inputs.shape)
+def make_BFGS_step(gradient_function):
+    def BFGS_step(x, approx_inv_hessian):
+        current_gradient = gradient_function(x)
+        current_step = - approx_inv_hessian@current_gradient
+        next_x = x + current_step
+        next_gradient = gradient_function(next_x)
+        y = jnp.expand_dims(next_gradient - current_gradient, axis=1)
+        s = jnp.expand_dims(current_step, axis=1)
+        Id = jnp.identity(approx_inv_hessian.shape[0], dtype=jnp.float64)
+        next_approx_inv_hessian = (Id - s@y.transpose()/(y.transpose()@s+1e-9))@approx_inv_hessian@(Id - y@s.transpose()/(y.transpose()@s+1e-9)) + s@s.transpose()/(y.transpose()@s+1e-9)
+        return next_x, next_approx_inv_hessian
+    return BFGS_step

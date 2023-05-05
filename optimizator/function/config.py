@@ -10,8 +10,8 @@ from function.helper_functions import *
 
 Nt = 4096
 Nh = 20
-IDFT_1ddl = jnp.array(construction_IDFT(Nt,Nh,1))
-DFT_1ddl = jnp.array(construction_DFT(Nt,Nh,1))
+IDFT_1ddl = jnp.array(construction_IDFT(Nt,Nh,1), dtype=jnp.float64)
+DFT_1ddl = jnp.array(construction_DFT(Nt,Nh,1), dtype=jnp.float64)
 
 kn = 1e4 #1e3
 eps = 1e1 #5e1

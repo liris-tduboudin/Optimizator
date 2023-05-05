@@ -1,6 +1,6 @@
 
-nb_points = 200
-iterations = 1000
+nb_points = 100
+iterations = 10000
 kept_threshold = 1e-4
 merge_threshold = 1e-4
 
