@@ -1,15 +1,8 @@
 import jax
 import jax.numpy as jnp
 
-def derivatives(target_function):
-    # target_function_hessian = jax.jit(jax.jacfwd(jax.jacrev(target_function_with_current_parameters)))
-    # target_function_gradient = jax.jit(jax.grad(target_function_with_current_parameters))
-    target_function_hessian = jax.jacfwd(jax.jacrev(target_function))
-    target_function_gradient = jax.grad(target_function)
-    return target_function_gradient, target_function_hessian
-
 def exact_newton_step(x, hessian, gradient):
-    return x - 1e-2 * jnp.linalg.solve(hessian, gradient)
+    return x - jnp.linalg.solve(hessian, gradient)
 
 @jax.jit
 def jax_pairwise_distance(x,y):
@@ -18,15 +11,50 @@ def jax_pairwise_distance(x,y):
     xy = - 2 * jnp.matmul(x, y.transpose())
     return x2+y2+xy
 
-def make_BFGS_step(gradient_function):
-    def BFGS_step(x, approx_inv_hessian):
-        current_gradient = gradient_function(x)
-        current_step = - approx_inv_hessian@current_gradient
-        next_x = x + current_step
-        next_gradient = gradient_function(next_x)
-        y = jnp.expand_dims(next_gradient - current_gradient, axis=1)
-        s = jnp.expand_dims(current_step, axis=1)
-        Id = jnp.identity(approx_inv_hessian.shape[0], dtype=jnp.float64)
-        next_approx_inv_hessian = (Id - s@y.transpose()/(y.transpose()@s+1e-9))@approx_inv_hessian@(Id - y@s.transpose()/(y.transpose()@s+1e-9)) + s@s.transpose()/(y.transpose()@s+1e-9)
-        return next_x, next_approx_inv_hessian
-    return BFGS_step
+def lbfgs_step(x, g, s, y):
+    q = g
+    alpha = jnp.zeros(s.shape[0])
+    mu = 1/((s*y).sum(axis=1)+1e-15)
+    for i in range(0, s.shape[0], 1):
+        alpha_i = mu[i] * jnp.dot(s[i], q)
+        alpha = alpha.at[i].set(alpha_i)
+        q = q - alpha_i * y[i]
+    B = jnp.identity(x.shape[0]) * jnp.dot(s[0], y[0])/(jnp.dot(y[0], y[0])+1e-15)
+    z = B.dot(q)
+    for i in range(s.shape[0]-1, -1, -1):
+        beta = mu[i] * jnp.dot(y[i], z)
+        z = z + s[i] * (alpha[i] - beta)
+    next_x = x - z
+    return next_x, -z
+
+if __name__ == '__main__':
+
+    # unbatched version
+
+    key = jax.random.PRNGKey(-1)
+    new_key, key = jax.random.split(key)
+    t = jax.random.uniform(key, (7,))
+    x = 100 * jax.random.uniform(new_key, (7,))
+
+    def l2(u):
+        return ((u-t)**2).sum()
+
+    l2_grad = jax.grad(l2)
+
+    init_g = l2_grad(x)
+    x = x - init_g
+    next_g = l2_grad(x)
+    s = jnp.expand_dims(-init_g, axis=0)
+    y = jnp.expand_dims(next_g-init_g, axis=0)
+
+    for k in range(20):
+
+        g = next_g
+        x, update = lbfgs_step(x, g, s, y)
+        next_g = l2_grad(x)
+        s = jnp.concatenate((jnp.expand_dims(update, axis=0), s), axis=0)
+        y = jnp.concatenate((jnp.expand_dims(next_g-g, axis=0), y), axis=0)
+        if s.shape[0] >= 3:
+            s = s[:-1, :]
+            y = y[:-1, :]
+        print(l2(x))

@@ -265,7 +265,8 @@ def construction_Zred_Fred_dZreddw_dFreddw(omega,M,C,K,F,Nh,beta,gamma,ddl_ln,dd
 					dFr_k_dw = dZr_k_dw@Z_red_k_inv@F_k_red + Zr_k@(Z_red_k_inv@dF_k_reddw - Z_red_k_inv@dZ_k_reddw@Z_red_k_inv@F_k_red)
 					dFr_dw[k*2*n_dof_nl-n_dof_nl:(k+1)*2*n_dof_nl-n_dof_nl]  = dFr_k_dw
 
-	return jnp.array(Z_red, dtype=jnp.float64),jnp.array(F_red, dtype=jnp.float64)
+	# return jnp.array(Z_red, dtype=jnp.float64),jnp.array(F_red, dtype=jnp.float64)
+	return Z_red, F_red
 
 def fnl_tilde_rlhbm(Xh_red,IDFT_1ddl,DFT_1ddl,g0,kn,eps, Nt):
 	g = IDFT_1ddl@Xh_red  - g0

@@ -10,8 +10,10 @@ from function.helper_functions import *
 
 Nt = 4096
 Nh = 20
-IDFT_1ddl = jnp.array(construction_IDFT(Nt,Nh,1), dtype=jnp.float64)
-DFT_1ddl = jnp.array(construction_DFT(Nt,Nh,1), dtype=jnp.float64)
+# IDFT_1ddl = jnp.array(construction_IDFT(Nt,Nh,1), dtype=jnp.float64)
+# DFT_1ddl = jnp.array(construction_DFT(Nt,Nh,1), dtype=jnp.float64)
+IDFT_1ddl = construction_IDFT(Nt,Nh,1)
+DFT_1ddl = construction_DFT(Nt,Nh,1)
 
 kn = 1e4 #1e3
 eps = 1e1 #5e1
@@ -45,5 +47,4 @@ penalite = None
 nu = 4
 
 omegas_range = [7.0/nu, 12.0/nu]
-#omegas_range = [11.5/nu, 12.0/nu]
-omegas_steps = 100#3
+omegas_steps = 100

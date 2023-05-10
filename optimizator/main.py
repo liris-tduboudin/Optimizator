@@ -20,8 +20,6 @@ from datetime import timedelta
 
 if __name__ == '__main__':
 
-    JAX_ENABLE_X64=True
-
     if opt_config.checkpoint_path is not None:
         checkpoint = pickle.load(opt_config.checkpoint_path)
         omega_start = checkpoint['omega_start']
@@ -49,7 +47,8 @@ if __name__ == '__main__':
                                 'iterations':opt_config.iterations,
                                 'kept_threshold':opt_config.kept_threshold,
                                 'merge_threshold':opt_config.merge_threshold,
-                                'key':omega_idx}
+                                'max_history':opt_config.max_history,
+                                'seed':omega_idx}
 
         solutions, loss = optimize(target_function, target_function_hparams, domain_sampler, optimization_hparams)
         if solutions is not None:
