@@ -83,6 +83,7 @@ if __name__ == '__main__':
         else:
             avg_omega_duration = (omega_idx * avg_omega_duration + current_omega_duration)/(omega_idx+1)
         print("Expected remaining time :", str(timedelta(seconds=avg_omega_duration*(omega_steps-omega_idx-1))))
+        print("-----------------")
 
     amps_lin = []
     for omega, solutions in solutions_storage:
