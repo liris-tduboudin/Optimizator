@@ -9,7 +9,7 @@ def optimize(target_function,
              ):
 
     # definitions
-    inputs = domain_sampler(optimization_hparams['nb_inputs'], target_function_hparams['nb_dims']).to(torch.device(device)).requires_grad_(True)
+    inputs = domain_sampler(optimization_hparams['nb_points'], target_function_hparams['nb_dims']).to(torch.device(device)).requires_grad_(True)
     
     optimizer = optim.LBFGS([inputs], lr=optimization_hparams['learning_rate'], history_size=optimization_hparams['max_history'])
 
