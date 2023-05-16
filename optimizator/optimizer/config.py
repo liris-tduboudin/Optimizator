@@ -1,6 +1,6 @@
 
 nb_points = 100
-iterations = 1000 # 3000
+iterations = 3000
 max_history = 15
 
 kept_threshold = 1e-4
