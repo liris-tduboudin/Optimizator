@@ -35,7 +35,7 @@ if __name__=='__main__':
     """
     pkl_file = './crf_file.pkl'
     with open(pkl_file,'rb') as file:
-    	res_dict = pkl.load(file)
+        res_dict = pkl.load(file)
     amps_RL = res_dict['amplitudes']
     omegas_RL = res_dict['omegas']
     Xhs_RL = res_dict['Xhs_full']

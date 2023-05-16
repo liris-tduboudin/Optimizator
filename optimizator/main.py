@@ -48,6 +48,7 @@ if __name__ == '__main__':
                                 'kept_threshold':opt_config.kept_threshold,
                                 'merge_threshold':opt_config.merge_threshold,
                                 'max_history':opt_config.max_history,
+                                'tolerance_change':opt_config.tolerance_change,
                                 'seed':omega_idx}
 
         solutions, loss = optimize(target_function, target_function_hparams, domain_sampler, optimization_hparams)
