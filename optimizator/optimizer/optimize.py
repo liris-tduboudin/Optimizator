@@ -52,9 +52,9 @@ def optimize(target_function,
             s = s[:, :-1, :]
             y = y[:, :-1, :]
 
-        if iteration % 100 == 0:
-            losses = (vectorized_target_function(inputs)**2).sum(axis=1)
-            print("avg loss :", losses.mean())
+        # if iteration % 100 == 0:
+        #     losses = (vectorized_target_function(inputs)**2).sum(axis=1)
+        #     print("avg loss :", losses.mean())
 
     # removal of improper solutions (e.g. bad local minima or saddle points)
     non_reduced_loss = (vectorized_target_function(inputs)**2).sum(axis=1)

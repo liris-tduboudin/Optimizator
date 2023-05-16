@@ -67,9 +67,18 @@ if __name__ == '__main__':
             print("Best loss reached :", loss)
 
         omega_end_time = time.time()
-        omega_duration = omega_end_time-omega_start_time
-        print("Time elapsed :", str(timedelta(seconds=omega_duration)))
-        print("Expected remaining time :", str(timedelta(seconds=omega_duration*(omega_steps-omega_idx-1))))
+        
+        time_since_global_start = omega_end_time - global_start_time
+        print("Time elapsed since beginning :", str(timedelta(seconds=time_since_global_start)))
+        current_omega_duration = omega_end_time-omega_start_time
+        print("Current omega optimization duration :", str(timedelta(seconds=current_omega_duration)))
+        if omega_idx == 0:
+            avg_omega_duration = current_omega_duration
+        else:
+            avg_omega_duration = (omega_idx * avg_omega_duration + current_omega_duration)/(omega_idx+1)
+        print("Expected remaining time :", str(timedelta(seconds=avg_omega_duration*(omega_steps-omega_idx-1))))
+        print("------------")
+
 
     amps_lin = []
     for omega, solutions in solutions_storage:
