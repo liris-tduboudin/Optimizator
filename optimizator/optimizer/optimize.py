@@ -25,15 +25,9 @@ def optimize(target_function,
 
         optimizer.step(closure)
 
-        # early stopping
-        if iteration % 10 == 0:
-            if iteration == 0:
-                previous_non_reduced_loss = target_function(target_function_hparams, inputs).pow(2).sum(dim=1).detach()
-            else:
-                current_non_reduced_loss = target_function(target_function_hparams, inputs).pow(2).sum(dim=1).detach()
-                if (current_non_reduced_loss - previous_non_reduced_loss).abs().min() < optimization_hparams['tolerance_change']:
-                    print("Optimization stuck, thus optimization stopped.")
-                    break
+        # if iteration % 100 == 0:
+        #     loss = closure()
+        #     print(iteration, loss.item())
 
     # removal of improper solutions (e.g. bad local minima or saddle points)
     function_outputs = target_function(target_function_hparams, inputs)
