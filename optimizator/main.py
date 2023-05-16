@@ -4,7 +4,7 @@ import torch
 import function.config as func_config
 from function.helper_functions import construction_Zred_Fred_dZreddw_dFreddw
 from function.target_function import target_function
-from function.domain_sampler import DomainSampler
+from function.domain_sampler import domain_sampler
 
 from optimizer.optimize import optimize
 import optimizer.config as opt_config
@@ -31,6 +31,7 @@ if __name__ == '__main__':
         solutions_storage = []
     
     global_start_time = time.time()
+    avg_omega_duration = 0.0
 
     for omega_idx, omega in enumerate(np.linspace(omega_start, omega_end, omega_steps)):
 
@@ -40,20 +41,24 @@ if __name__ == '__main__':
         Z = torch.tensor(Z, dtype=torch.float32, device=device)
         Fh = torch.tensor(Fh, dtype=torch.float32, device=device)
 
-        target_function_hparams = {'Z':Z, 'Fh':Fh, 'nb_dims':2*func_config.Nh+1}
+        IDFT_1ddl_tensor = torch.tensor(func_config.IDFT_1ddl, dtype=torch.float32, device=device)
+        DFT_1ddl_tensor = torch.tensor(func_config.DFT_1ddl, dtype=torch.float32, device=device)
+
+        target_function_hparams = {'Z':Z, 
+                                   'Fh':Fh, 
+                                   'nb_dims':2*func_config.Nh+1 ,
+                                   'IDFT_1ddl':IDFT_1ddl_tensor, 
+                                   'DFT_1ddl':DFT_1ddl_tensor}
 
         optimization_hparams = {'learning_rate':opt_config.learning_rate,
                                 'nb_points':opt_config.nb_points,
                                 'iterations':opt_config.iterations,
                                 'kept_threshold':opt_config.kept_threshold,
                                 'merge_threshold':opt_config.merge_threshold,
-                                'exponential_mean':opt_config.exponential_mean,
-                                'scheduler_factor':opt_config.scheduler_factor,
-                                'scheduler_patience':opt_config.scheduler_patience,
-                                'scheduler_min_lr':opt_config.scheduler_min_lr,
-                                'finetuning_iterations':opt_config.finetuning_iterations}
+                                'max_history':opt_config.max_history,
+                                'tolerance_change':opt_config.tolerance_change}
 
-        solutions, loss = optimize(target_function, target_function_hparams, DomainSampler, optimization_hparams, device)
+        solutions, loss = optimize(target_function, target_function_hparams, domain_sampler, optimization_hparams, device)
         if solutions is not None:
             solutions_storage.append([omega, solutions])
             checkpoint = {'omega_start':omega+(func_config.omegas_range[1]-func_config.omegas_range[0])/func_config.omegas_steps,
@@ -68,9 +73,16 @@ if __name__ == '__main__':
             print("Best loss reached :", loss)
 
         omega_end_time = time.time()
-        omega_duration = omega_end_time-omega_start_time
-        print("Time elapsed :", str(timedelta(seconds=omega_duration)))
-        print("Expected remaining time :", str(timedelta(seconds=omega_duration*(omega_steps-omega_idx-1))))
+
+        time_since_global_start = omega_end_time - global_start_time
+        print("Time elapsed since beginning :", str(timedelta(seconds=time_since_global_start)))
+        current_omega_duration = omega_end_time-omega_start_time
+        print("Current omega optimization duration :", str(timedelta(seconds=current_omega_duration)))
+        if omega_idx == 0:
+            avg_omega_duration = current_omega_duration
+        else:
+            avg_omega_duration = (omega_idx * avg_omega_duration + current_omega_duration)/(omega_idx+1)
+        print("Expected remaining time :", str(timedelta(seconds=avg_omega_duration*(omega_steps-omega_idx-1))))
 
     amps_lin = []
     for omega, solutions in solutions_storage:

@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 def f(x):
     return (1 - x[0])**2 + 100 * (x[1] - x[0]**2)**2
 
-
 # Gradient descent
 x_gd = 10*torch.ones(2, 1)
 x_gd.requires_grad = True

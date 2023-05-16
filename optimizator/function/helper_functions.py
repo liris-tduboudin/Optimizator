@@ -266,8 +266,8 @@ def construction_Zred_Fred_dZreddw_dFreddw(omega,M,C,K,F,Nh,beta,gamma,ddl_ln,dd
 
 	return Z_red,F_red
 
-def fnl_tilde_rlhbm(Xh_red,IDFT_1ddl,DFT_1ddl,g0,kn,eps, Nt, device):
-	g = torch.mm(IDFT_1ddl.to(device),Xh_red.t())  - g0*torch.ones([Nt, Xh_red.size(0)], device=device)
+def fnl_tilde_rlhbm(Xh_red,IDFT_1ddl,DFT_1ddl,g0,kn,eps,Nt):
+	g = torch.mm(IDFT_1ddl,Xh_red.t())  - g0
 	fnl = kn/2*g + torch.sqrt((kn*g/2)**2 + eps**2)
-	fnl_tilde = torch.mm(DFT_1ddl.to(device),fnl).t()
+	fnl_tilde = torch.mm(DFT_1ddl,fnl).t()
 	return fnl_tilde
