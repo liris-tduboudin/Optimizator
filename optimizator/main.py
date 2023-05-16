@@ -55,8 +55,7 @@ if __name__ == '__main__':
                                 'iterations':opt_config.iterations,
                                 'kept_threshold':opt_config.kept_threshold,
                                 'merge_threshold':opt_config.merge_threshold,
-                                'max_history':opt_config.max_history,
-                                'tolerance_change':opt_config.tolerance_change}
+                                'max_history':opt_config.max_history}
 
         solutions, loss = optimize(target_function, target_function_hparams, domain_sampler, optimization_hparams, device)
         if solutions is not None:
